@@ -11,8 +11,11 @@ from tests.mocks import TeleBotMock
 class BaseTestCase(unittest.TestCase):
     def setUp(self):
         self.tele_bot = TeleBotMock('')
-        db_storage = MongoStorage(config.mongo_db_name,
-                                  config.mongo_test_collection_name)
-        themes_storage = ThemesStorage(db_storage)
+        self.db_storage = MongoStorage(config.mongo_db_name,
+                                       config.mongo_test_collection_name)
+        themes_storage = ThemesStorage(self.db_storage)
         themes_manager = ThemesManager(themes_storage)
         self.themes_bot = ThemesBot(self.tele_bot, themes_manager)
+
+    def tearDown(self):
+        self.db_storage.drop()
