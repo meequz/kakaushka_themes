@@ -161,18 +161,18 @@ class ThemesBot(object):
     def route(self, message):
         msg = message.text
         
-        if msg.startswith('/touch ') or msg.startswith('/t '):
+        if msg.startswith(('/touch ', '/t ')):
             self.touch(message)
         
         if msg in ('/ls', '/l'):
             self.ls(message)
         
-        if msg.startswith('/ed ') or msg.startswith('/e '):
+        if msg.startswith(('/ed ', '/e ')):
             self.ed(message)
         
         if msg in ('/rm -rf', '/rm -rf /'):
             self.rmrf(message)
-        elif msg.startswith('/rm ') or msg.startswith('/r '):
+        elif msg.startswith(('/rm ', '/r ')):
             self.rm(message)
         
         if msg in ('/man', '/m', '/help', '/h'):
