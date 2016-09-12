@@ -23,8 +23,8 @@ class MongoStorage(object):
     def update_one(self, pattern, update):
         return self.collection.update_one(pattern, update)
     
-    def count(self):
-        return self.collection.count()
+    def count(self, pattern=None):
+        return self.collection.count(pattern)
     
     def find(self, pattern=None):
         return self.collection.find(pattern)
@@ -43,16 +43,17 @@ class ThemesStorage(object):
     def __init__(self, db_storage):
         self.db_storage = db_storage
     
-    def save(self, text, author):
+    def save(self, text, author, chat_id):
         num = self.db_storage.count() + 1
-        self.db_storage.create({'num': num, 'text': text, 'author': author})
+        self.db_storage.create({'num': num, 'text': text, 'author': author,
+                                'chat': chat_id})
         return num
     
-    def count(self):
-        return self.db_storage.count()
+    def count(self, chat_id):
+        return self.db_storage.count({'chat': chat_id})
     
-    def list(self):
-        return [theme for theme in self.db_storage.find()]
+    def list(self, chat_id):
+        return [theme for theme in self.db_storage.find({'chat': chat_id})]
     
     def update(self, num, new_text, author):
         self.db_storage.update({'num': num},
@@ -79,15 +80,16 @@ class ThemesManager(object):
         msg_splitted = message.text.split(' ')
         theme = ' '.join(msg_splitted[1:])
         author = self._get_author(message)
-        num = self.themes_storage.save(theme, author)
+        num = self.themes_storage.save(theme, author, message.chat.id)
         return num
     
-    def list(self):
-        if self.themes_storage.count() < 1:
-            return ('No themes found! Discuss your shitty movies & shows! '
-                    'https://rottentomatoes.com')
-        all_themes = self.themes_storage.list()
+    def list(self, message):
+        if self.themes_storage.count(message.chat.id) < 1:
+            return 'No themes found! Discuss your shitty movies & shows!'
+        
+        all_themes = self.themes_storage.list(message.chat.id)
         all_themes_sorted = sorted(all_themes, key=lambda x: x['num'])
+        
         text = ''
         for theme in all_themes_sorted:
             text += '{num}. {text} ({author})\n'.format(**theme)
@@ -132,7 +134,7 @@ class ThemesBot(object):
         self._send_and_log(message.chat.id, text)
     
     def ls(self, message):
-        themes = self.manager.list()
+        themes = self.manager.list(message)
         self._send(message.chat.id, themes)
     
     def ed(self, message):
