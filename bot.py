@@ -35,7 +35,10 @@ class MongoStorage(object):
     def delete(self, pattern):
         return self.collection.delete_many(pattern)
     
-    def delete_all(self):
+    def delete_one(self, pattern):
+        return self.collection.delete_one(pattern)
+    
+    def drop(self):
         return self.db.drop_collection(self.collection_name)
 
 
@@ -44,7 +47,7 @@ class ThemesStorage(object):
         self.db_storage = db_storage
     
     def save(self, text, author, chat_id):
-        num = self.db_storage.count() + 1
+        num = self.db_storage.count({'chat': chat_id}) + 1
         self.db_storage.create({'num': num, 'text': text, 'author': author,
                                 'chat': chat_id})
         return num
@@ -55,17 +58,18 @@ class ThemesStorage(object):
     def list(self, chat_id):
         return [theme for theme in self.db_storage.find({'chat': chat_id})]
     
-    def update(self, num, new_text, author):
-        self.db_storage.update({'num': num},
+    def update(self, num, new_text, author, chat_id):
+        self.db_storage.update({'num': num, 'chat': chat_id},
                                {'$set': {'text': new_text, 'author': author}})
     
-    def remove(self, num):
-        res = self.db_storage.delete({'num': num})
-        self.db_storage.update({'num': {'$gt': num}}, {'$inc': {'num': -1}})
+    def remove(self, num, chat_id):
+        res = self.db_storage.delete_one({'num': num, 'chat': chat_id})
+        self.db_storage.update({'num': {'$gt': num}, 'chat': chat_id},
+                               {'$inc': {'num': -1}})
         return res.deleted_count
     
-    def remove_all(self):
-        self.db_storage.delete_all()
+    def remove_all(self, chat_id):
+        self.db_storage.delete({'chat': chat_id})
 
 
 class ThemesManager(object):
@@ -100,17 +104,17 @@ class ThemesManager(object):
         num = int(msg_splitted[1])
         theme = ' '.join(msg_splitted[2:])
         author = self._get_author(message)
-        self.themes_storage.update(num, theme, author)
+        self.themes_storage.update(num, theme, author, message.chat.id)
         return num
     
     def remove(self, message):
         msg_splitted = message.text.split(' ')
         num = int(msg_splitted[1])
-        deleted_count = self.themes_storage.remove(num)
+        deleted_count = self.themes_storage.remove(num, message.chat.id)
         return num, deleted_count
     
-    def remove_all(self):
-        self.themes_storage.remove_all()
+    def remove_all(self, message):
+        self.themes_storage.remove_all(message.chat.id)
 
 
 class ThemesBot(object):
@@ -153,7 +157,7 @@ class ThemesBot(object):
         self._send_and_log(message.chat.id, text)
     
     def rmrf(self, message):
-        self.manager.remove_all()
+        self.manager.remove_all(message)
         text = 'All themes removed'
         self._send_and_log(message.chat.id, text)
     
