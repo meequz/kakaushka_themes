@@ -14,11 +14,3 @@ help_message = (
     'Each command has a shortcut, /{first_letter}\n'
     'Markdown is allowed'
 )
-
-
-#~ TODO
-#~ - tar
-#~ - ls tar
-#~ - 'and N archived' in ls
-#~ - dates in archived
-#~ - buttons near each theme
