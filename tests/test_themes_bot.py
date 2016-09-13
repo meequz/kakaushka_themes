@@ -9,6 +9,7 @@ class BaseTestThemesBot(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.chat = ChatMock(1)
+        self.chat_2 = ChatMock(2)
         self.user = UserMock('Foo', 'Bar')
     
     def tearDown(self):
@@ -16,6 +17,12 @@ class BaseTestThemesBot(BaseTestCase):
     
     def _check(self, msg, expected_answer):
         message = MessageMock(self.chat, msg, self.user)
+        self.themes_bot.route(message)
+        answer = self.tele_bot.last_message.text
+        self.assertEqual(answer, expected_answer)
+    
+    def _check_2(self, msg, expected_answer):
+        message = MessageMock(self.chat_2, msg, self.user)
         self.themes_bot.route(message)
         answer = self.tele_bot.last_message.text
         self.assertEqual(answer, expected_answer)
@@ -67,9 +74,18 @@ class TestThemesBotComplicated(BaseTestThemesBot):
         self._check('/rm 1', 'Theme 1 removed')
         self._check('/ls', '1. bar boo (Foo Bar)\n2. $%^&*( (Foo Bar)\n')
 
+
+class TestThemesBotMultipleChats(BaseTestThemesBot):
     def test_touch_two_chats(self):
-        pass
-        #~ create chat1 and chat2
-        #~ create theme in chat1 and in chat2
-        #~ list themes in chat1, check there is only one theme
-        #~ list themes in chat2, check there is only one theme
+        self._check('/touch apchhi', 'Theme №1 created')
+        self._check_2('/touch і ў', 'Theme №1 created')
+        self._check('/ls', '1. apchhi (Foo Bar)\n')
+        self._check_2('/ls', '1. і ў (Foo Bar)\n')
+    
+    def test_rmrf_two_chats(self):
+        self._check('/touch apchhi', 'Theme №1 created')
+        self._check_2('/touch і ў', 'Theme №1 created')
+        self._check('/rm -rf', 'All themes removed')
+        self._check('/ls',
+                    'No themes found! Discuss your shitty movies & shows!')
+        self._check_2('/ls', '1. і ў (Foo Bar)\n')
