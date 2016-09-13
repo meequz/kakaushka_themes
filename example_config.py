@@ -1,12 +1,9 @@
-import uuid
-
-
 bot_name = 'kakaushka_themes'
 token = ''
 
 mongo_db_name = 'kakaushka'
 mongo_collection_name = 'themes'
-mongo_test_collection_name = 'themes_test_' + str(uuid.uuid4())
+mongo_test_collection_name = 'themes_test'
 
 help_message = (
     '/touch {theme text} - create new theme\n'
