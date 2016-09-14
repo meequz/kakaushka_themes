@@ -89,3 +89,10 @@ class TestThemesBotMultipleChats(BaseTestThemesBot):
         self._check('/ls',
                     'No themes found! Discuss your shitty movies & shows!')
         self._check_2('/ls', '1. і ў (Foo Bar)\n')
+    
+    def test_ed_two_chats(self):
+        self._check('/touch йцу нек', 'Theme №1 created')
+        self._check_2('/touch йцу нек', 'Theme №1 created')
+        self._check('/ed 1 омбом бом бом бом бом бом бом', 'Theme 1 updated')
+        self._check_2('/ls', '1. йцу нек (Foo Bar)\n')
+        self._check('/ls', '1. омбом бом бом бом бом бом бом (Foo Bar)\n')
