@@ -17,7 +17,7 @@ Bot answer:
 
 Bot answer:
 
-`1. Apple released a compatibility layer with android (Firstname Lastname)`
+`1. Apple released Android compatibility layer for iPhone (Firstname Lastname)`
 
 `2. NSA has been suspected of data capture by embeding hardware backdoor in wires (Firstname Lastname)`
 
