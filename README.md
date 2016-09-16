@@ -1,7 +1,9 @@
-# kakaushka_themes
+kakaushka_themes
+===================
+
 The bot remembers the topics you want to discuss later. I created it for friends group chat. We store the topics in it and then discuss them live drinking chocolate (kakaushka) or at lunch.
 
-Example:
+## Example ##
 
 `/touch Apple released Android compatibility layer for iPhone`
 
@@ -22,7 +24,7 @@ Bot answer:
 `2. NSA has been suspected of data capture by embeding hardware backdoor in wires (Firstname Lastname)`
 
 
-To run:
+## How to run ##
 - install requirements
 - rename `example_config.py` to `config.py`
 - place your token in `config.py`
