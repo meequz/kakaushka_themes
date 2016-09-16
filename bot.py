@@ -18,7 +18,7 @@ class MongoStorage(object):
         return self.collection.insert_one(entry)
     
     def update(self, pattern, update):
-        return self.collection.update(pattern, update, multi=True)
+        return self.collection.update_many(pattern, update)
     
     def update_one(self, pattern, update):
         return self.collection.update_one(pattern, update)
@@ -59,8 +59,10 @@ class ThemesStorage(object):
         return [theme for theme in self.db_storage.find({'chat': chat_id})]
     
     def update(self, num, new_text, author, chat_id):
-        self.db_storage.update({'num': num, 'chat': chat_id},
-                               {'$set': {'text': new_text, 'author': author}})
+        self.db_storage.update_one(
+            {'num': num, 'chat': chat_id},
+            {'$set': {'text': new_text, 'author': author}}
+        )
     
     def remove(self, num, chat_id):
         res = self.db_storage.delete_one({'num': num, 'chat': chat_id})
