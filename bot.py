@@ -7,6 +7,10 @@ import config
 
 
 class MongoStorage(object):
+    """
+    Wrapper for MongoDB
+    """
+    
     def __init__(self, db_name, collection_name):
         self.client = pymongo.MongoClient()
         self.db_name = db_name
@@ -43,6 +47,11 @@ class MongoStorage(object):
 
 
 class ThemesStorage(object):
+    """
+    It implements storage logic.
+    Responsible for storing operations and format.
+    """
+    
     def __init__(self, db_storage):
         self.db_storage = db_storage
     
@@ -75,6 +84,10 @@ class ThemesStorage(object):
 
 
 class ThemesManager(object):
+    """
+    Parses the incoming messages and call appropriate storage methods.
+    """
+    
     def __init__(self, themes_storage):
         self.themes_storage = themes_storage
     
@@ -90,16 +103,8 @@ class ThemesManager(object):
         return num
     
     def list(self, message):
-        if self.themes_storage.count(message.chat.id) < 1:
-            return 'No themes found! Discuss your shitty movies & shows!'
-        
         all_themes = self.themes_storage.list(message.chat.id)
-        all_themes_sorted = sorted(all_themes, key=lambda x: x['num'])
-        
-        text = ''
-        for theme in all_themes_sorted:
-            text += '{num}. {text} ({author})\n'.format(**theme)
-        return text
+        return sorted(all_themes, key=lambda x: x['num'])
     
     def update(self, message):
         msg_splitted = message.text.split(' ')
@@ -120,6 +125,10 @@ class ThemesManager(object):
 
 
 class ThemesBot(object):
+    """
+    Generates correct answer according to manager returned values.
+    """
+    
     def __init__(self, tele_bot, manager):
         self.tele_bot = tele_bot
         self.manager = manager
@@ -140,8 +149,12 @@ class ThemesBot(object):
         self._send_and_log(message.chat.id, text)
     
     def ls(self, message):
-        themes = self.manager.list(message)
-        self._send(message.chat.id, themes)
+        text = ''
+        for theme in self.manager.list(message):
+            text += '{num}. {text} ({author})\n'.format(**theme)
+        if not text:
+            text = 'No themes found! Discuss your shitty movies & shows!'
+        self._send(message.chat.id, text)
     
     def ed(self, message):
         num = self.manager.update(message)
