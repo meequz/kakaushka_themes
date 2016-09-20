@@ -1,3 +1,4 @@
+import time
 import logging
 
 import telebot
@@ -200,13 +201,19 @@ class ThemesBot(object):
             self.man(message)
 
 
-def main():
+def init():
     tele_bot = telebot.TeleBot(config.token)
     db_storage = MongoStorage(config.mongo_db_name,
                               config.mongo_collection_name)
     themes_storage = ThemesStorage(db_storage)
     themes_manager = ThemesManager(themes_storage)
     themes_bot = ThemesBot(tele_bot, themes_manager)
+    return tele_bot, themes_bot
+
+
+def main():
+    logging.basicConfig(format='%(asctime)s    %(message)s')
+    tele_bot, themes_bot = init()
     
     @tele_bot.message_handler(content_types=['text'])
     def process_message(message):
@@ -215,10 +222,17 @@ def main():
         except Exception as e:
             answer = 'Some error happened:\n{}'.format(str(e))
             tele_bot.send_message(message.chat.id, answer)
-            logging.exception('message')
+            logging.exception('"{}": {}'.format(message.text, str(e)))
     
     logging.warning('{} bot started'.format(config.bot_name))
-    tele_bot.polling(none_stop=True)
+    
+    try:
+        tele_bot.polling(none_stop=True)
+    except Exception as e:
+        logging.exception(str(e))
+        time.sleep(5)
+        logging.warning('restarting bot...')
+        main()
 
 
 if __name__ == '__main__':
