@@ -202,21 +202,26 @@ class ThemesBot(object):
 
 
 def init():
+    logging.basicConfig(format='%(asctime)s    %(message)s')
+    logging.warning('Starting bot...')
+    
     tele_bot = telebot.TeleBot(config.token)
     db_storage = MongoStorage(config.mongo_db_name,
                               config.mongo_collection_name)
     themes_storage = ThemesStorage(db_storage)
     themes_manager = ThemesManager(themes_storage)
     themes_bot = ThemesBot(tele_bot, themes_manager)
+    
+    logging.warning('{} bot started'.format(config.bot_name))
     return tele_bot, themes_bot
 
 
 def main():
-    logging.basicConfig(format='%(asctime)s    %(message)s')
     tele_bot, themes_bot = init()
     
     @tele_bot.message_handler(content_types=['text'])
     def process_message(message):
+        # report if there are message processing problems
         try:
             themes_bot.route(message)
         except Exception as e:
@@ -224,14 +229,12 @@ def main():
             tele_bot.send_message(message.chat.id, answer)
             logging.exception('"{}": {}'.format(message.text, str(e)))
     
-    logging.warning('{} bot started'.format(config.bot_name))
-    
+    # if some network problem, wait and restart bot
     try:
         tele_bot.polling(none_stop=True)
     except Exception as e:
         logging.exception(str(e))
         time.sleep(5)
-        logging.warning('restarting bot...')
         main()
 
 
