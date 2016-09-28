@@ -212,11 +212,11 @@ def init():
     themes_manager = ThemesManager(themes_storage)
     themes_bot = ThemesBot(tele_bot, themes_manager)
     
-    logging.warning('{} bot started'.format(config.bot_name))
+    logging.warning('{} started'.format(config.bot_name))
     return tele_bot, themes_bot
 
 
-def report(message, exc):
+def report(tele_bot, message, exc):
     """
     Report message processing problem in chat and logs
     """
@@ -243,7 +243,7 @@ def main():
         try:
             themes_bot.route(message)
         except Exception as e:
-            report(message, e)
+            report(tele_bot, message, e)
     
     try:
         tele_bot.polling(none_stop=True)
