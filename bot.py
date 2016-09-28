@@ -59,7 +59,7 @@ class ThemesStorage(object):
     def save(self, text, author, chat_id):
         num = self.db_storage.count({'chat': chat_id}) + 1
         self.db_storage.create({'num': num, 'text': text, 'author': author,
-                                'chat': chat_id})
+                                'chat': chat_id, 'votes': 0})
         return num
     
     def count(self, chat_id):
@@ -152,7 +152,7 @@ class ThemesBot(object):
     def ls(self, message):
         text = ''
         for theme in self.manager.list(message):
-            text += '{num}. {text} ({author})\n'.format(**theme)
+            text += '{num}. {text} ({author}, {votes} votes)\n'.format(**theme)
         if not text:
             text = 'No themes found! Discuss your shitty movies & shows!'
         self._send(message.chat.id, text)
