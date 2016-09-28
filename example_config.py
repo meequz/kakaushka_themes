@@ -9,6 +9,8 @@ help_message = (
     '/touch {theme text} - create new theme. Shortcut is /t\n'
     '/ls - get list of all themes. Shortcut is /l\n'
     '/ed {theme_number} {new_theme_text} - update theme. Shortcut is /e\n'
+    '/more {theme_number} - vote for theme. Shortcut is /m\n'
+    '/less {theme_number} - vote against theme\n'
     '/rm {theme_number} - remove theme. Shortcut is /r\n'
     '/tar {theme_number} - move theme to archive, not implemented yet\n'
     '/man or /help - this message. Shortcuts are /m and /h\n'

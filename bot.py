@@ -74,6 +74,14 @@ class ThemesStorage(object):
             {'$set': {'text': new_text, 'author': author}}
         )
     
+    def vote_for(self, num, chat_id):
+        self.db_storage.update_one(
+            {'num': num, 'chat': chat_id}, {'$inc': {'votes': 1}})
+    
+    def vote_against(self, num, chat_id):
+        self.db_storage.update_one(
+            {'num': num, 'chat': chat_id}, {'$inc': {'votes': -1}})
+    
     def remove(self, num, chat_id):
         res = self.db_storage.delete_one({'num': num, 'chat': chat_id})
         self.db_storage.update({'num': {'$gt': num}, 'chat': chat_id},
@@ -114,6 +122,20 @@ class ThemesManager(object):
         author = self._get_author(message)
         self.themes_storage.update(num, theme, author, message.chat.id)
         return num
+    
+    def vote_for(self, message):
+        msg_splitted = message.text.split(' ')
+        num = int(msg_splitted[1])
+        author = self._get_author(message)
+        self.themes_storage.vote_for(num, message.chat.id)
+        return author, num
+    
+    def vote_against(self, message):
+        msg_splitted = message.text.split(' ')
+        num = int(msg_splitted[1])
+        author = self._get_author(message)
+        self.themes_storage.vote_against(num, message.chat.id)
+        return author, num
     
     def remove(self, message):
         msg_splitted = message.text.split(' ')
@@ -162,6 +184,16 @@ class ThemesBot(object):
         text = 'Theme {} updated'.format(num)
         self._send_and_log(message.chat.id, text)
     
+    def more(self, message):
+        author, num = self.manager.vote_for(message)
+        text = '{} voted fot theme {}'.format(author, num)
+        self._send_and_log(message.chat.id, text)
+    
+    def less(self, message):
+        author, num = self.manager.vote_against(message)
+        text = '{} voted against theme {}'.format(author, num)
+        self._send_and_log(message.chat.id, text)
+    
     def rm(self, message):
         num, deleted_count = self.manager.remove(message)
         if deleted_count == 0:
@@ -191,6 +223,12 @@ class ThemesBot(object):
         
         if msg.startswith(('/ed ', '/e ')):
             self.ed(message)
+        
+        if msg.startswith(('/more ', '/m ')):
+            self.more(message)
+        
+        if msg.startswith(('/less ')):
+            self.less(message)
         
         if msg in ('/rm -rf', '/rm -rf /'):
             self.rmrf(message)

@@ -52,6 +52,18 @@ class TestThemesBotCommon(BaseTestThemesBot):
         self._check('/ls',
                     'No themes found! Discuss your shitty movies & shows!')
     
+    def test_more(self):
+        self._check('/touch foo', 'Theme №1 created')
+        self._check('/ls', '1. foo (Foo Bar, 0 votes)\n')
+        self._check('/more 1', 'Foo Bar voted fot theme 1')
+        self._check('/ls', '1. foo (Foo Bar, 1 votes)\n')
+    
+    def test_less(self):
+        self._check('/touch foo', 'Theme №1 created')
+        self._check('/ls', '1. foo (Foo Bar, 0 votes)\n')
+        self._check('/less 1', 'Foo Bar voted against theme 1')
+        self._check('/ls', '1. foo (Foo Bar, -1 votes)\n')
+    
     def test_man(self):
         self._check('/man', config.help_message)
 
@@ -109,5 +121,5 @@ class TestThemesBotMultipleChats(BaseTestThemesBot):
         self._check_2('/touch йцу нек', 'Theme №1 created')
         self._check('/ed 1 омбом бом бом бом бом бом бом', 'Theme 1 updated')
         self._check_2('/ls', '1. йцу нек (Foo Bar, 0 votes)\n')
-        self._check(
-            '/ls', '1. омбом бом бом бом бом бом бом (Foo Bar, 0 votes)\n')
+        self._check('/ls',
+                    '1. омбом бом бом бом бом бом бом (Foo Bar, 0 votes)\n')
