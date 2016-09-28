@@ -56,6 +56,17 @@ class TestThemesBotCommon(BaseTestThemesBot):
         self._check('/man', config.help_message)
 
 
+class TestThemesBotEmpty(BaseTestThemesBot):
+    def test_touch_empty(self):
+        self._check('/touch', None)
+    
+    def test_ed_empty(self):
+        self._check('/ed', None)
+    
+    def test_rm_empty(self):
+        self._check('/rm', None)
+
+
 class TestThemesBotComplicated(BaseTestThemesBot):
     def test_rm_missing(self):
         self._check('/ls',

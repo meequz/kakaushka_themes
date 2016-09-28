@@ -19,7 +19,7 @@ class MessageMock(object):
 class TeleBotMock(object):
     def __init__(self, token):
         self.token = token
-        self.last_message = None
+        self.last_message = MessageMock(None, None, None)
     
     def send_message(self, chat_id, text, **kwargs):
         chat = ChatMock(chat_id)
