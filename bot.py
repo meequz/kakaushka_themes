@@ -216,26 +216,39 @@ def init():
     return tele_bot, themes_bot
 
 
+def report(message, exc):
+    """
+    Report message processing problem in chat and logs
+    """
+    
+    answer = 'Some error happened:\n{}'.format(str(exc))
+    tele_bot.send_message(message.chat.id, answer)
+    logging.exception('"{}": {}'.format(message.text[:79], str(exc)))
+
+
+def restart(exc):
+    """
+    Wait and restart bot
+    """
+    
+    logging.exception(str(exc))
+    time.sleep(5)
+    main()
+
+
 def main():
     tele_bot, themes_bot = init()
-    
     @tele_bot.message_handler(content_types=['text'])
     def process_message(message):
-        # report if there are message processing problems
         try:
             themes_bot.route(message)
         except Exception as e:
-            answer = 'Some error happened:\n{}'.format(str(e))
-            tele_bot.send_message(message.chat.id, answer)
-            logging.exception('"{}": {}'.format(message.text, str(e)))
+            report(message, e)
     
-    # if some network problem, wait and restart bot
     try:
         tele_bot.polling(none_stop=True)
     except Exception as e:
-        logging.exception(str(e))
-        time.sleep(5)
-        main()
+        restart(e)
 
 
 if __name__ == '__main__':
